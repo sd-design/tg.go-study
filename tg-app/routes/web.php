@@ -2,14 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BotController;
+use App\Http\Controllers\TelegramController;
 use App\Http\Controllers\TechController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/bot', [BotController::class, 'index']);
-Route::post('/bot', [BotController::class, 'input']);
+Route::get('/bot', [TelegramController::class, 'handleWebhook']);
+Route::post('/bot',[TelegramController::class, 'handleWebhook']);
 
 
 //Tech part of site
