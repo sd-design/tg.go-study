@@ -21,7 +21,7 @@ class TelegramController extends Controller
         try {
             // Получаем обновления от Telegram
             $update = Telegram::commandsHandler(true);
-
+            $commandMode = 0;
 
             //Не забыть отключить логирование!!!!!
             Log::info('Telegram Update: ' . json_encode($update->toArray()));
@@ -34,12 +34,10 @@ class TelegramController extends Controller
                 $text = $update->getMessage()->getText();
 
                 // Логика обработки сообщения
-                $commandMode = 0;
                 switch (strtolower($text)) {
                     case '/start':
                         $responseText = '<b>Что может делать этот бот?</b>
-    Бот-помощник для оперативного информирования о заявках на сайте.
-    <tg-emoji emoji-id="5368324170671202286">👍</tg-emoji>';
+Бот-помощник для оперативного информирования о заявках на сайте. <tg-emoji emoji-id="5368324170671202286">👍</tg-emoji>';
                         break;
                     case '/menu':
                         $this->sendKeyboardStart($chatId);
@@ -66,8 +64,30 @@ class TelegramController extends Controller
                 }
 
 
-                // Пример отправки сообщения с клавиатурой
+                // Отправка сообщения с клавиатурой
                // $this->sendKeyboard($chatId);
+            }
+
+            //Обработка инлайн-кнопок
+            if ($update->isType('callback_query')) {
+                $callbackQuery = $update->getCallbackQuery();
+                $chatId = $callbackQuery->getMessage()->getChat()->getId();
+                $data = $callbackQuery->getData();
+
+                // Ответ на нажатие кнопки
+                $responseText = "Вы нажали: " . $data;
+
+                Telegram::sendMessage([
+                    'chat_id' => $chatId,
+                    'text' => $responseText,
+                ]);
+
+                // Подтверждаем callback-запрос
+                Telegram::answerCallbackQuery([
+                    'callback_query_id' => $callbackQuery->getId(),
+                    'text' => 'Действие выполнено!',
+                    'show_alert' => false,
+                ]);
             }
 
             // Возвращаем статус 200, чтобы Telegram знал, что запрос обработан

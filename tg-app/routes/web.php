@@ -20,3 +20,11 @@ Route::get('/tech/get_session', [TechController::class, 'getSession']);
 Route::get('/tech/encrypt', [TechController::class, 'encrypt']);
 Route::get('/tech/decrypt', [TechController::class, 'decrypt']);
 Route::get('/tech/json', [TechController::class, 'json_test']);
+
+// Clear cache
+Route::get('/tech/clear_cache', function() {
+    Artisan::call('cache:clear');
+    Artisan::call('config:cache');
+    Artisan::call('view:clear');
+    Artisan::call('route:clear');
+    return "Кэш очищен.";});
