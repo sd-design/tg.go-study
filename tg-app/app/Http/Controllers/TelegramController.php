@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use Telegram\Bot\Exceptions\TelegramSDKException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Commands\Commands;
 
 class TelegramController extends Controller
 {
@@ -29,30 +31,32 @@ class TelegramController extends Controller
 
 
             // Проверяем, есть ли сообщение
-            if ($update->isType('message')) {
+          if ($update->isType('message')) {
                 $chatId = $update->getMessage()->getChat()->getId();
                 $text = $update->getMessage()->getText();
 
-                // Логика обработки сообщения
-                switch (strtolower($text)) {
-                    case '/start':
-                        $responseText = '<b>Что может делать этот бот?</b>
-Бот-помощник для оперативного информирования о заявках на сайте. <tg-emoji emoji-id="5368324170671202286">👍</tg-emoji>';
-                        break;
-                    case '/menu':
-                        $this->sendKeyboardStart($chatId);
-                        $commandMode = 1;
-                        break;
-                    case '/help':
-                        $responseText = 'Доступные команды:
-                        /start
-                        /menu
-                        /add_me
-                        /help';
-                        break;
-                    default:
-                        $responseText = "<b>Вы написали</b>: " ."<blockquote>" .$text. "</blockquote>";
-                }
+                             // Логика обработки сообщения
+                             switch (strtolower($text)) {
+                                 case '/start':
+                                     $responseText = '<b>Что может делать этот бот?</b>
+             Бот-помощник для оперативного информирования о заявках на сайте. <tg-emoji emoji-id="5368324170671202286">👍</tg-emoji>';
+                                     break;
+                                 case '/menu':
+                                     $this->sendKeyboardStart($chatId);
+                                     $commandMode = 1;
+                                     break;
+                                 case '/help':
+                                     $responseText = 'Доступные команды:
+                                     /start
+                                     /menu
+                                     /add_me
+                                     /help';
+                                     break;
+                                 default:
+                                     $responseText = "<b>Вы написали</b>: " ."<blockquote>" .$text. "</blockquote>";
+                             }
+
+            //$responseText = this->checkCommand($text);
 
                 // Отправляем ответ пользователю
                 if($commandMode === 0){
@@ -83,11 +87,11 @@ class TelegramController extends Controller
                 ]);
 
                 // Подтверждаем callback-запрос
-                Telegram::answerCallbackQuery([
+                /*Telegram::answerCallbackQuery([
                     'callback_query_id' => $callbackQuery->getId(),
                     'text' => 'Действие выполнено!',
                     'show_alert' => false,
-                ]);
+                ]);*/
             }
 
             // Возвращаем статус 200, чтобы Telegram знал, что запрос обработан
@@ -111,7 +115,7 @@ class TelegramController extends Controller
             'inline_keyboard' => [
                 [
                     ['text' => 'запросить контакт', 'callback_data' => 'buttonContact'],
-                    ['text' => 'подключить как менеджера', 'callback_data' => 'buttonAddManager'],
+                    ['text' => 'подключиться как менеджер', 'callback_data' => 'buttonAddManager'],
                 ],
             ],
         ];

@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Blade;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -61,6 +62,16 @@ class TechController extends Controller
         $data = ['application'=> 'ver 1.0', 'json' => 'test', 'result' => 'ok'];
 
         return $data;
+    }
+
+    public function db_test()
+    {
+        $options =  DB::table('options')->get();
+
+        foreach ($options as $option) {
+            $data = ['Name'=> $option->name, 'switch' => $option->switch, 'value' => $option->value];
+            return $data;
+        }
     }
 
 }
