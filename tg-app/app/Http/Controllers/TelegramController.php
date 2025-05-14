@@ -21,7 +21,7 @@ class TelegramController extends Controller
 
         try {
             // Получаем обновления от Telegram
-            $update = Telegram::commandsHandler(true);
+            $update = Telegram::getWebhookUpdate();
             $commandMode = 0;
 
             //Не забыть отключить логирование!!!!!
