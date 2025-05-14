@@ -7,7 +7,6 @@ use Telegram\Bot\Laravel\Facades\Telegram;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Http\Commands\Commands;
 
 class TelegramController extends Controller
 {
@@ -26,7 +25,7 @@ class TelegramController extends Controller
             $commandMode = 0;
 
             //Не забыть отключить логирование!!!!!
-            Log::info('Telegram Update: ' . json_encode($update->toArray()));
+            //Log::info('Telegram Update: ' . json_encode($update->toArray()));
 
 
 
@@ -34,16 +33,24 @@ class TelegramController extends Controller
           if ($update->isType('message')) {
                 $chatId = $update->getMessage()->getChat()->getId();
                 $text = $update->getMessage()->getText();
+              //$response = Telegram::getMe(); //Bot Indetificator
+
+                $firstName = $update->getMessage()->getChat()->getFirstName();
+                $lastName = $update->getMessage()->getChat()->getLastName();
+                $userName = $update->getMessage()->getChat()->getUsername();
 
                              // Логика обработки сообщения
                              switch (strtolower($text)) {
                                  case '/start':
                                      $responseText = '<b>Что может делать этот бот?</b>
-             Бот-помощник для оперативного информирования о заявках на сайте. <tg-emoji emoji-id="5368324170671202286">👍</tg-emoji>';
+Бот-помощник для оперативного информирования о заявках на сайте. <tg-emoji emoji-id="5368324170671202286">👍</tg-emoji>';
                                      break;
                                  case '/menu':
                                      $this->sendKeyboardStart($chatId);
                                      $commandMode = 1;
+                                     break;
+                                 case '/add_me':
+                                     $responseText = 'Data: '. $firstName. " | ". $lastName . " | ". $userName ;
                                      break;
                                  case '/help':
                                      $responseText = 'Доступные команды:
@@ -78,8 +85,9 @@ class TelegramController extends Controller
                 $chatId = $callbackQuery->getMessage()->getChat()->getId();
                 $data = $callbackQuery->getData();
 
+                $this->insert_action($chatId, $data);
                 // Ответ на нажатие кнопки
-                $responseText = "Вы нажали: " . $data;
+                $responseText = " Вы нажали: " . $data . "chatID: ".$chatId;
 
                 Telegram::sendMessage([
                     'chat_id' => $chatId,
@@ -87,7 +95,7 @@ class TelegramController extends Controller
                 ]);
 
                 // Подтверждаем callback-запрос
-                /*Telegram::answerCallbackQuery([
+               /*Telegram::answerCallbackQuery([
                     'callback_query_id' => $callbackQuery->getId(),
                     'text' => 'Действие выполнено!',
                     'show_alert' => false,
@@ -164,6 +172,40 @@ class TelegramController extends Controller
             return response()->json($response);
         } catch (TelegramSDKException $e) {
             return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function insert_action($chatId, $action)
+    {
+        $session = DB::table('sessions')->where('chat_id', $chatId)->first();
+
+        if(isset($session->status)){
+            return $session->status;
+        }
+        else{
+            DB::table('sessions')->insert([
+                'chat_id' => $chatId,
+                'status' => $action
+            ]);
+            //return response("No session yet", 400);
+        }
+    }
+
+    public function add_new_manager($chatId, $action)
+    {
+        $manager = DB::table('managers')->where('chat_id', $chatId)->first();
+
+        if(isset($session->role)){
+            return $session->role;
+        }
+        else{
+            DB::table('managers')->insert([
+                'chat_id' => $chatId,
+                'first_name' => $action,
+                'last_name' => $action,
+                'username' => $action
+            ]);
+            //return response("No session yet", 400);
         }
     }
 

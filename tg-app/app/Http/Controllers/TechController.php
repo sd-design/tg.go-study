@@ -74,4 +74,18 @@ class TechController extends Controller
         }
     }
 
+    public function insert_action()
+    {
+        $chatId =  '150625076';
+        $session = DB::table('sessions')->where('chat_id', $chatId)->first();
+
+            if(isset($session->status)){
+                return response(["status"=> $session->status], 200);
+            }
+            else{
+                return response("No session yet", 400);
+            }
+
+    }
+
 }

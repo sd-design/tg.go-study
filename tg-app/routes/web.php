@@ -21,6 +21,7 @@ Route::get('/tech/encrypt', [TechController::class, 'encrypt']);
 Route::get('/tech/decrypt', [TechController::class, 'decrypt']);
 Route::get('/tech/json', [TechController::class, 'json_test']);
 Route::get('/tech/db', [TechController::class, 'db_test']);
+Route::get('/tech/bot', [TechController::class, 'insert_action']);
 
 // Clear cache
 Route::get('/tech/clear_cache', function() {
